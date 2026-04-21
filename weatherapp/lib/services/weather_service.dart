@@ -180,15 +180,15 @@ class WeatherService {
   // Returns asset path for background image, null = fall back to gradient
   String? getBackgroundImage(String iconCode) {
     if (iconCode.startsWith('01') && iconCode.endsWith('d')) {
-      return 'assets/bg_sunny.jpg';
+      return 'assets/bg_sunny.png';
     } else if (iconCode.startsWith('02') ||
         iconCode.startsWith('03') ||
         iconCode.startsWith('04')) {
-      return 'assets/bg_cloudy.jpg';
+      return 'assets/bg_cloudy.png';
     } else if (iconCode.startsWith('09') ||
         iconCode.startsWith('10') ||
         iconCode.startsWith('11')) {
-      return 'assets/bg_rainy.jpg';
+      return 'assets/bg_rainy.png';
     }
     return null;
   }

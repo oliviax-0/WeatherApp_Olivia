@@ -18,11 +18,12 @@ class _WeatherScreenState extends State<WeatherScreen>
     with SingleTickerProviderStateMixin {
   final WeatherService _weatherService = WeatherService();
   WeatherData? _weatherData;
-  bool _isLoading = false;
+  bool _isLoading = true;
   String? _errorMessage;
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  bool _isHomeLocation = true;
 
   @override
   void initState() {
@@ -38,12 +39,50 @@ class _WeatherScreenState extends State<WeatherScreen>
       begin: const Offset(0, 0.15),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
+
+    _loadWeather();
   }
 
   @override
   void dispose() {
     _animController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadWeather() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final position = await _weatherService.getCurrentLocation();
+      final weather = await _weatherService.getWeatherByLocation(
+        position.latitude,
+        position.longitude,
+      );
+      setState(() {
+        _weatherData = weather;
+        _isLoading = false;
+        _isHomeLocation = true;
+      });
+      _animController.forward(from: 0);
+    } catch (e) {
+      try {
+        final weather = await _weatherService.getWeatherByCity('Tangerang');
+        setState(() {
+          _weatherData = weather;
+          _isLoading = false;
+          _isHomeLocation = true;
+        });
+        _animController.forward(from: 0);
+      } catch (e2) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = e.toString().replaceAll('Exception: ', '');
+        });
+      }
+    }
   }
 
   Future<void> _searchCity(String cityName) async {
@@ -56,6 +95,7 @@ class _WeatherScreenState extends State<WeatherScreen>
       setState(() {
         _weatherData = weather;
         _isLoading = false;
+        _isHomeLocation = false;
       });
       _animController.forward(from: 0);
     } catch (e) {
@@ -101,7 +141,7 @@ class _WeatherScreenState extends State<WeatherScreen>
                 ),
               ),
             ),
-          // Gradient overlay
+          // Gradient: full bg when no image, dark tint overlay when image present
           Positioned.fill(
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 500),
@@ -124,37 +164,8 @@ class _WeatherScreenState extends State<WeatherScreen>
               ? _buildLoadingView()
               : _errorMessage != null
                   ? _buildErrorView()
-                  : _weatherData == null
-                      ? _buildEmptyView()
-                      : _buildWeatherView(),
+                  : _buildWeatherView(),
         ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyView() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          children: [
-            const SizedBox(height: 12),
-            CitySearchBar(onSearch: _searchCity),
-            const Spacer(),
-            const Icon(Icons.wb_sunny_outlined, color: Colors.white38, size: 80),
-            const SizedBox(height: 20),
-            const Text(
-              'Search for a city\nto see the weather',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white60,
-                fontSize: 18,
-                height: 1.5,
-              ),
-            ),
-            const Spacer(flex: 2),
-          ],
-        ),
       ),
     );
   }
@@ -176,14 +187,12 @@ class _WeatherScreenState extends State<WeatherScreen>
   }
 
   Widget _buildErrorView() {
-    return SafeArea(
+    return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.all(32),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 12),
-            CitySearchBar(onSearch: _searchCity),
-            const Spacer(),
             const Icon(Icons.cloud_off, color: Colors.white54, size: 64),
             const SizedBox(height: 16),
             Text(
@@ -191,7 +200,16 @@ class _WeatherScreenState extends State<WeatherScreen>
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
-            const Spacer(flex: 2),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _loadWeather,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try Again'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white24,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ],
         ),
       ),
@@ -244,16 +262,24 @@ class _WeatherScreenState extends State<WeatherScreen>
             child: Column(
               children: [
                 const SizedBox(height: 12),
-                CitySearchBar(onSearch: _searchCity),
+                CitySearchBar(onSearch: _searchCity, onLocationTap: _loadWeather),
                 const SizedBox(height: 24),
-                Text(
-                  weather.cityName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.w300,
-                    letterSpacing: -0.5,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (_isHomeLocation)
+                      const Icon(Icons.navigation, color: Colors.white, size: 16),
+                    if (_isHomeLocation) const SizedBox(width: 4),
+                    Text(
+                      weather.cityName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w300,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(
