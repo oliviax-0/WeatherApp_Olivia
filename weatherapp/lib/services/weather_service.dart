@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import '../models/weather_model.dart';
-import '../config/secrets.dart';
+import '../config/secrets.dart';  //change to config/secrets.example.dart and add your API key there
 import 'dart:ui';
 
 class WeatherService {
@@ -42,7 +42,8 @@ class WeatherService {
       final currentResponse = await http.get(currentUrl);
 
       if (currentResponse.statusCode != 200) {
-        throw Exception('Failed to fetch weather: ${currentResponse.statusCode}');
+        throw Exception(
+            'Failed to fetch weather: ${currentResponse.statusCode}');
       }
 
       final currentJson = json.decode(currentResponse.body);
@@ -85,7 +86,8 @@ class WeatherService {
         throw Exception('City not found: $cityName');
       }
       if (currentResponse.statusCode != 200) {
-        throw Exception('Failed to fetch weather: ${currentResponse.statusCode}');
+        throw Exception(
+            'Failed to fetch weather: ${currentResponse.statusCode}');
       }
 
       final currentJson = json.decode(currentResponse.body);
