@@ -1,15 +1,3 @@
-# Weather App 🌤️
-
-A beautiful iOS-style Flutter weather app powered by OpenWeatherMap API.
-
-## Screenshots
-Matches the iOS Weather app UI with:
-- Glassmorphism cards with backdrop blur
-- Dynamic gradient backgrounds based on weather condition
-- Hourly forecast with precipitation probability
-- 10-day daily forecast with temperature range bars
-- Weather detail grid (humidity, wind, visibility, feels like)
-- City search + GPS location support
 
 ## Setup
 
@@ -42,23 +30,6 @@ flutter run
 flutter run --device-id <your-ios-device-id>
 ```
 
-## Project Structure
-```
-lib/
-├── main.dart                    # App entry point
-├── models/
-│   └── weather_model.dart       # Data models
-├── services/
-│   └── weather_service.dart     # API calls + location
-├── screens/
-│   └── weather_screen.dart      # Main weather screen
-└── widgets/
-    ├── hourly_forecast_card.dart # Hourly forecast strip
-    ├── daily_forecast_card.dart  # Daily forecast rows
-    ├── weather_detail_grid.dart  # 2x3 detail grid
-    └── city_search_bar.dart      # Animated search bar
-```
-
 ## Features
 - 📍 Auto-detect location via GPS
 - 🔍 Search any city worldwide
@@ -85,7 +56,4 @@ lib/
 - `GET /weather` — Current conditions
 - `GET /forecast` — 5-day / 3-hour forecast (used for hourly + daily)
 
-## Notes
-- The free OpenWeatherMap tier does **not** include One Call API (used for hourly/daily in some apps)
-- This app uses the `/forecast` endpoint which is available on the free tier
-- Weather icons come from `openweathermap.org/img/wn/{icon}@2x.png`
+
